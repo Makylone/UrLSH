@@ -44,7 +44,7 @@ jobs:
     - name: Upload JAR file
       uses: actions/upload-artifact@v4
       with:
-        name: url-shortener
+        name: url-shortener-build
         path: target/url-shortener.jar
         retention-days: 1
     
@@ -55,3 +55,56 @@ jobs:
       with:
         files: target/url-shortener.jar
         generate_release_notes: true
+
+  deploy:
+    needs: build  
+    if: startsWith(github.ref, 'refs/tags/') ||  github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download JAR from Build Job
+      uses: actions/download-artifact@v4
+      with:
+        name: url-shortener-build 
+        path: target/ 
+
+    - name: Transfer files to VPS via SCP
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SPASWORD }}
+      
+        source: "Dockerfile,compose.prod.yaml,target/*.jar"
+        target: "~/apps/url-shortener"
+
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SPASWORD }}
+        envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB
+        script: |
+          cd ~/apps/url-shortener
+
+          echo "POSTGRES_USER=$POSTGRES_USER" > .env
+          echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env
+          echo "POSTGRES_DB=$POSTGRES_DB" >> .env
+          
+          # Rename compose file for convenience
+          mv compose.prod.yaml compose.yaml
+          
+          # Stop the old container (if running), Rebuild, and Start
+          docker compose down -v 
+          docker compose up -d --build --remove-orphans
+          
+          # Clean up unused images to save disk space on your VPS
+          docker image prune -f
+        env:
+          # Link the GitHub Secrets to the script variables declared in 'envs' above
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
