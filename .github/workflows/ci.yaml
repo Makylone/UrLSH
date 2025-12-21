@@ -75,7 +75,7 @@ jobs:
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SPASWORD }}
+        password: ${{ secrets.VPS_SPASWORD }}
       
         source: "Dockerfile,compose.prod.yaml,target/*.jar"
         target: "~/apps/url-shortener"
@@ -85,7 +85,7 @@ jobs:
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SPASWORD }}
+        password: ${{ secrets.VPS_SPASWORD }}
         envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB
         script: |
           cd ~/apps/url-shortener
