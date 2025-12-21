@@ -1,5 +1,7 @@
 package com.Makylone.UrLSH.controller;
 
+import java.util.NoSuchElementException;
+
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -8,7 +10,9 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,5 +66,20 @@ public class UrlShorterControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"originalUrl\": \"not-a-valid-url\"}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldRedirectToOriginal_WhenShortCodeExist() throws Exception {
+        when(urlShorterService.getOriginalUrl("1")).thenReturn("https://google.com");
+        mockMvc.perform(get("/api/v1/shorten/1"))
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", "https://google.com"));
+    }
+
+    @Test
+    void shouldReturnNotFound_WHenShortCodeDoesNotExist() throws Exception {
+        when(urlShorterService.getOriginalUrl("99999999")).thenThrow(new NoSuchElementException("The shortcode does not exist"));
+        mockMvc.perform(get("/api/v1/shorten/99999999"))
+                .andExpect(status().isNotFound());
     }
 }
