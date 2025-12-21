@@ -103,8 +103,8 @@ jobs:
           
           # Clean up unused images to save disk space on your VPS
           docker image prune -f
-        env:
-          # Link the GitHub Secrets to the script variables declared in 'envs' above
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      env:
+        # Link the GitHub Secrets to the script variables declared in 'envs' above
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
