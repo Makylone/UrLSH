@@ -41,7 +41,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: url-shortener
-        path: target/url-shortener.jar
+        path: target/*.jar
         retention-days: 1
     
     # 5. Création de la release
