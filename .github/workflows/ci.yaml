@@ -45,7 +45,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: url-shortener-build
-        path: target/url-shortener.jar
+        path: target/*.jar
         retention-days: 1
     
     # 6. Création de la release
@@ -53,7 +53,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
       with:
-        files: target/url-shortener.jar
+        files: target/*.jar
         generate_release_notes: true
 
   deploy:
