@@ -48,10 +48,10 @@ public class UrlShorterService {
         long id = base62encoder.decode(shortcode);
 
         UrlMapping mapping = urlRepository.findById(id).orElseThrow(() -> new NoSuchElementException());
-        System.out.println("DEBUG CHECK:");
+        /*System.out.println("DEBUG CHECK:");
         System.out.println("Current Time: " + LocalDateTime.now());
         System.out.println("Expire Time:  " + mapping.getExpireAt());
-        System.out.println("Is Before?:   " + mapping.getExpireAt().isBefore(LocalDateTime.now()));
+        System.out.println("Is Before?:   " + mapping.getExpireAt().isBefore(LocalDateTime.now()));*/
         LocalDateTime expiration = mapping.getExpireAt();
         if (expiration != null) {
             if (expiration.isBefore(LocalDateTime.now())) {

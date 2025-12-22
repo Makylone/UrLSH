@@ -39,11 +39,9 @@ public class UrlShorterControllerTest {
     void shouldReturnShortUrl_WhenRequestIsValid() throws Exception {
         String url = "https://google.com";
         String shorterCode = "AbC12";
-        LocalDateTime expDate = LocalDateTime.now();
-        expDate.plusMonths(2);
-        LocalDateTime stabLocalDateTime = expDate.truncatedTo(ChronoUnit.MICROS);
+        LocalDateTime stableTime = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS);
         // Mock the service call
-        when(urlShorterService.shortenURL(anyString(), any())).thenReturn(new ShortenResponse(shorterCode, stabLocalDateTime));
+        when(urlShorterService.shortenURL(anyString(), any())).thenReturn(new ShortenResponse(shorterCode, stableTime));
 
         // Make the actual call to the API
         String requestBody = """
@@ -57,7 +55,7 @@ public class UrlShorterControllerTest {
                 .content(requestBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.shortUrl").value(shorterCode))
-                .andExpect(jsonPath("$.expireAt").value(stabLocalDateTime.toString()));
+                .andExpect(jsonPath("$.expireAt").value(stableTime.toString()));
     }
 
     @Test
