@@ -23,7 +23,7 @@ public class UrlMapping {
     @Column(unique=true)
     private String shortCode;
 
-    @Column(nullable=false, columnDefinition="DATETIME")
+    @Column(nullable=false, columnDefinition="TIME")
     private LocalDateTime expireAt;
 
     public UrlMapping() {}
