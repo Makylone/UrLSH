@@ -32,6 +32,7 @@ public class WebController {
 
     @PostMapping("/")
     public String ShortenUrl(@RequestParam String originalUrl, Model model){
+        
         LocalDateTime expireAt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS).plusMonths(2);
         ShortenResponse response = urlShorterService.shortenURL(originalUrl, expireAt);
 
