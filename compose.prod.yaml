@@ -8,6 +8,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      APP_BASE_URL: ${APP_BASE_URL}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     depends_on:
       - db
