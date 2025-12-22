@@ -1,7 +1,6 @@
 package com.Makylone.UrLSH.service;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
@@ -53,8 +52,11 @@ public class UrlShorterService {
         System.out.println("Current Time: " + LocalDateTime.now());
         System.out.println("Expire Time:  " + mapping.getExpireAt());
         System.out.println("Is Before?:   " + mapping.getExpireAt().isBefore(LocalDateTime.now()));
-        if(mapping.getExpireAt() != null && mapping.getExpireAt().isBefore(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))){
-            throw new UrlExpiredException("The requested URL has expired");
+        LocalDateTime expiration = mapping.getExpireAt();
+        if (expiration != null) {
+            if (expiration.isBefore(LocalDateTime.now())) {
+                 throw new UrlExpiredException("The requested URL has expired");
+            }
         }
 
         return mapping.getOriginalUrl();
