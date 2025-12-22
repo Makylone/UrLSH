@@ -31,7 +31,7 @@ public class UrlShorterService {
         // 1. Save "empty" to get an ID
         UrlMapping urlMapping = new UrlMapping(originalUrl);
         if(expireAt != null){
-            urlMapping.setExpireAt(expireAt.plusMonths(1));
+            urlMapping.setExpireAt(expireAt);
         }
         UrlMapping savedUrl = urlRepository.save(urlMapping);
 
