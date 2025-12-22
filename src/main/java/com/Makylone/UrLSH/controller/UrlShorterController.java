@@ -1,5 +1,8 @@
 package com.Makylone.UrLSH.controller;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,8 +31,9 @@ public class UrlShorterController {
 
     @PostMapping
     public ShortenResponse shorten(@RequestBody @Valid ShortenRequest request) {
+        LocalDateTime currentTime = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS).plusMonths(2);
         // Delegates the work to the service
-        return urlShorterService.shortenURL(request.originalUrl());
+        return urlShorterService.shortenURL(request.originalUrl(), currentTime);
     }
 
     @GetMapping("/{shortCode}")

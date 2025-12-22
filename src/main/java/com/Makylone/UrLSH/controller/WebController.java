@@ -1,5 +1,9 @@
 package com.Makylone.UrLSH.controller;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,13 +32,18 @@ public class WebController {
 
     @PostMapping("/")
     public String ShortenUrl(@RequestParam String originalUrl, Model model){
-        ShortenResponse response = urlShorterService.shortenURL(originalUrl);
+        LocalDateTime currentTime = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
+        ShortenResponse response = urlShorterService.shortenURL(originalUrl, currentTime);
 
         String cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         
         String fullUrl = cleanBaseUrl + "/api/v1/shorten/" + response.shortUrl();
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy 'at' hh:mm a");
+        String formattedDate = response.expireAt().format(formatter);
+
         model.addAttribute("shortUrl", fullUrl);
+        model.addAttribute("expirationDate", formattedDate);
         
         return "index";
     }

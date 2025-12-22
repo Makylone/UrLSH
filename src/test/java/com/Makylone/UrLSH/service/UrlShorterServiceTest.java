@@ -1,9 +1,11 @@
 package com.Makylone.UrLSH.service;
 
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.Makylone.UrLSH.dto.ShortenResponse;
 import com.Makylone.UrLSH.entity.UrlMapping;
+import com.Makylone.UrLSH.exception.UrlExpiredException;
 import com.Makylone.UrLSH.repository.UrlMappingRepository;
 import com.Makylone.UrLSH.util.Base62Encoder;
 
@@ -40,7 +43,7 @@ public class UrlShorterServiceTest {
         // -- B. WHEN -- 
         when(encoder.encode(1005L)).thenReturn("gd");
 
-        ShortenResponse response =  urlShorterService.shortenURL(url);
+        ShortenResponse response =  urlShorterService.shortenURL(url, null);
 
          // -- C. THEN --
         assertThat(response.shortUrl()).isEqualTo("gd");
@@ -81,5 +84,44 @@ public class UrlShorterServiceTest {
         assertThrows(NoSuchElementException.class, () -> {
             urlShorterService.getOriginalUrl(shortenCode);
         });
+    }
+
+    @Test
+    void shouldThrowException_WhenShortCodeIsExpire(){
+        String shortenCode = "3H7";
+        long decodedCode = 11;
+
+        when(encoder.decode(shortenCode)).thenReturn(decodedCode);
+
+        UrlMapping expiredUrl = new UrlMapping();
+
+        expiredUrl.setOriginalUrl("https://example.com");
+        expiredUrl.setExpireAt(LocalDateTime.now().minusDays(1));
+
+        when(urlMappingRepository.findById(decodedCode)).thenReturn(Optional.of(expiredUrl));
+
+        assertThrows(UrlExpiredException.class, () -> {
+            urlShorterService.getOriginalUrl(shortenCode);
+        });
+    }
+
+    @Test
+    void shouldReturnUrl_WhenNotExpire(){
+        String shortenCode = "DWnK";
+        long decodedCode = 13;
+        String originalLink = "https://example.com";
+
+        when(encoder.decode(shortenCode)).thenReturn(decodedCode);
+
+        UrlMapping expiredUrl = new UrlMapping();
+
+        expiredUrl.setOriginalUrl(originalLink);
+        expiredUrl.setExpireAt(LocalDateTime.now().plusDays(1));
+
+        when(urlMappingRepository.findById(decodedCode)).thenReturn(Optional.of(expiredUrl));
+
+        String result = urlShorterService.getOriginalUrl(shortenCode);
+
+        assertEquals(originalLink, result);
     }
 }

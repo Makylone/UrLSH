@@ -1,5 +1,7 @@
 package com.Makylone.UrLSH.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +22,9 @@ public class UrlMapping {
 
     @Column(unique=true)
     private String shortCode;
+
+    @Column(nullable=false, columnDefinition="DATETIME")
+    private LocalDateTime expireAt;
 
     public UrlMapping() {}
     
@@ -49,5 +54,13 @@ public class UrlMapping {
 
     public void setShortCode(String shortCode){
         this.shortCode = shortCode;
+    }
+
+    public LocalDateTime getExpireAt(){
+        return expireAt;
+    }
+
+    public void setExpireAt(LocalDateTime expireDate){
+        this.expireAt = expireDate;
     }
 }

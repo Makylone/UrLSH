@@ -1,8 +1,11 @@
 package com.Makylone.UrLSH.controller;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +19,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.Makylone.UrLSH.dto.ShortenRequest;
 import com.Makylone.UrLSH.dto.ShortenResponse;
+import com.Makylone.UrLSH.exception.UrlExpiredException;
 import com.Makylone.UrLSH.service.UrlShorterService;
 
 
@@ -34,9 +39,11 @@ public class UrlShorterControllerTest {
     void shouldReturnShortUrl_WhenRequestIsValid() throws Exception {
         String url = "https://google.com";
         String shorterCode = "AbC12";
-
+        LocalDateTime expDate = LocalDateTime.now();
+        expDate.plusMonths(2);
+        LocalDateTime stabLocalDateTime = expDate.truncatedTo(ChronoUnit.MICROS);
         // Mock the service call
-        when(urlShorterService.shortenURL(anyString())).thenReturn(new ShortenResponse(shorterCode, null));
+        when(urlShorterService.shortenURL(anyString(), any())).thenReturn(new ShortenResponse(shorterCode, stabLocalDateTime));
 
         // Make the actual call to the API
         String requestBody = """
@@ -49,7 +56,8 @@ public class UrlShorterControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.shortUrl").value(shorterCode));
+                .andExpect(jsonPath("$.shortUrl").value(shorterCode))
+                .andExpect(jsonPath("$.expireAt").value(stabLocalDateTime.toString()));
     }
 
     @Test
@@ -81,5 +89,37 @@ public class UrlShorterControllerTest {
         when(urlShorterService.getOriginalUrl("99999999")).thenThrow(new NoSuchElementException("The shortcode does not exist"));
         mockMvc.perform(get("/api/v1/shorten/99999999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturnGone_WhenUrlIsExpire() throws Exception{
+        String shortCode = "expired123";
+        when(urlShorterService.getOriginalUrl(shortCode))
+        .thenThrow(new UrlExpiredException("URL has expired"));
+
+        // ACT & ASSERT
+        mockMvc.perform(get("/api/v1/shorten/{shortCode}", shortCode))
+                .andExpect(status().isGone());
+    }
+
+    @Test
+    void shouldCreateShortUrl_WithExpirationDate() throws Exception {
+        // ARRANGE
+        String originalUrl = "https://example.com";
+        // Create a stable future date for testing
+        String futureDate = LocalDateTime.now().plusDays(5).truncatedTo(ChronoUnit.SECONDS).toString();
+        
+        ShortenRequest request = new ShortenRequest(originalUrl, LocalDateTime.parse(futureDate));
+        
+        // Mock service response
+        when(urlShorterService.shortenURL(anyString(), any()))
+            .thenReturn(new ShortenResponse("short123", LocalDateTime.parse(futureDate)));
+
+        // ACT & ASSERT
+        mockMvc.perform(post("/api/v1/shorten")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"originalUrl\":\"" + originalUrl + "\", \"expiresAt\":\"" + futureDate + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.expireAt").value(futureDate));
     }
 }

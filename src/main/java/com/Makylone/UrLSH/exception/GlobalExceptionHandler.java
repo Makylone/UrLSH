@@ -1,5 +1,7 @@
 package com.Makylone.UrLSH.exception;
 
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -17,5 +19,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(UrlExpiredException.class)
+    public ResponseEntity<Object> handleGone(UrlExpiredException e){
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.GONE.value());
+        body.put("error", "Gone");
+        body.put("message", e.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.GONE);
     }
 }
