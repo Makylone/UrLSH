@@ -62,7 +62,7 @@ public class UrlShorterController {
             // Delegates the work to the service
             ShortenResponse response = urlShorterService.shortenURL(request.originalUrl(), currentTime);
             Map<String, Object> body = new LinkedHashMap<>();
-            body.put("shortCode", response.shortUrl());
+            body.put("shortUrl", response.shortUrl());
             body.put("expireAt", response.expireAt());
             return ResponseEntity.status(HttpStatus.CREATED).body(body);
         }
