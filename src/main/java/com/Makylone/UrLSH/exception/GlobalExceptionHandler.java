@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class) // 2. Listen for this specific Java error
     public ResponseEntity<Map<String, String>> handleNotFound(NoSuchElementException e) {
-        // 3. Return a nice JSON with 404 status
+        // 3. Return JSON with 404 status
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", e.getMessage()));
