@@ -39,7 +39,7 @@ public class UrlShorterControllerTest {
     void shouldReturnShortUrl_WhenRequestIsValid() throws Exception {
         String url = "https://google.com";
         String shorterCode = "AbC12";
-        LocalDateTime stableTime = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime stableTime = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS).withSecond(10).withNano(0);;
         // Mock the service call
         when(urlShorterService.shortenURL(anyString(), any())).thenReturn(new ShortenResponse(shorterCode, stableTime));
 
@@ -105,7 +105,7 @@ public class UrlShorterControllerTest {
         // ARRANGE
         String originalUrl = "https://example.com";
         // Create a stable future date for testing
-        String futureDate = LocalDateTime.now().plusDays(5).truncatedTo(ChronoUnit.SECONDS).toString();
+        String futureDate = LocalDateTime.now().plusDays(5).truncatedTo(ChronoUnit.SECONDS).withSecond(10).withNano(0).toString();
         
         ShortenRequest request = new ShortenRequest(originalUrl, LocalDateTime.parse(futureDate));
         
