@@ -53,7 +53,7 @@ public class UrlShorterControllerTest {
         mockMvc.perform(post("/api/v1/shorten")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.shortUrl").value(shorterCode))
                 .andExpect(jsonPath("$.expireAt").value(stableTime.toString()));
     }
@@ -117,7 +117,7 @@ public class UrlShorterControllerTest {
         mockMvc.perform(post("/api/v1/shorten")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"originalUrl\":\"" + originalUrl + "\", \"expiresAt\":\"" + futureDate + "\"}"))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.expireAt").value(futureDate));
     }
 }
